@@ -2,6 +2,7 @@ package com.example.movie_rater.service;
 
 import com.example.movie_rater.client.ImdbClient;
 import com.example.movie_rater.client.dto.ImdbSearchResponse;
+import com.example.movie_rater.client.dto.ImdbTitleResponse;
 import com.example.movie_rater.model.Movie;
 import com.example.movie_rater.model.Review;
 import com.example.movie_rater.model.User;
@@ -115,6 +116,10 @@ public class MovieRaterService {
 
     public ImdbSearchResponse searchImdbMovies(String query) {
         return imdbClient.searchMovies(query, 10);
+    }
+
+    public ImdbTitleResponse getImdbMovieById(String imdbId) {
+        return imdbClient.getMovieById(imdbId);
     }
 
     public CompletableFuture<Void> saveMovieAndReview(Review review, Movie movie) {

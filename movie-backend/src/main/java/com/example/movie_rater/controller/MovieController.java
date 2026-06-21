@@ -1,6 +1,7 @@
 package com.example.movie_rater.controller;
 
 import com.example.movie_rater.client.dto.ImdbSearchResponse;
+import com.example.movie_rater.client.dto.ImdbTitleResponse;
 import com.example.movie_rater.dto.ReviewRequest;
 import com.example.movie_rater.model.Review;
 import com.example.movie_rater.service.MovieRaterService;
@@ -28,6 +29,13 @@ public class MovieController {
     @GetMapping("/search")
     public ResponseEntity<ImdbSearchResponse> searchMovies(@Parameter(description = "Search query") @RequestParam(value = "query") String query) {
         ImdbSearchResponse response = movieRaterService.searchImdbMovies(query);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Get movie details from imdb", description = "Put imdbId to get full movie details (title, year, plot, image) from IMDB")
+    @GetMapping("/imdb/{imdbId}")
+    public ResponseEntity<ImdbTitleResponse> getMovieDetails(@Parameter(description = "ID from imdb") @PathVariable(value = "imdbId") String imdbId) {
+        ImdbTitleResponse response = movieRaterService.getImdbMovieById(imdbId);
         return ResponseEntity.ok(response);
     }
 
