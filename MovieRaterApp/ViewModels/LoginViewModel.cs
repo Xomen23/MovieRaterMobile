@@ -54,6 +54,13 @@ public partial class LoginViewModel : ObservableObject
 
             if (user is not null)
             {
+                if (string.IsNullOrWhiteSpace(user.Id) && !string.IsNullOrWhiteSpace(user.Username))
+                {
+                    var refreshed = await _apiService.GetUserAsync(user.Username);
+                    if (refreshed?.Id is not null)
+                        user = refreshed;
+                }
+
                 _sessionService.SaveUser(user);
                 Password = string.Empty;
                 await Shell.Current.GoToAsync("//SearchPage");

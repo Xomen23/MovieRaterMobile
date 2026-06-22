@@ -3,6 +3,8 @@ package com.example.movie_rater.controller;
 import com.example.movie_rater.dto.ErrorResponse;
 import com.example.movie_rater.dto.LoginRequest;
 import com.example.movie_rater.dto.RegisterRequest;
+import com.example.movie_rater.dto.UpdatePasswordRequest;
+import com.example.movie_rater.dto.UpdateUsernameRequest;
 import com.example.movie_rater.model.User;
 import com.example.movie_rater.service.MovieRaterService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -70,5 +72,37 @@ public class UserController {
             @Parameter(description = "Username of the logged in user") @RequestParam(value = "username") String username) {
         User user = movieRaterService.getUserByUsername(username).join();
         return ResponseEntity.ok(user);
+    }
+
+    @Operation(summary = "Update username", description = "Change username for an existing user")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Korisnicko ime uspesno promenjeno"),
+            @ApiResponse(responseCode = "404", description = "Korisnik nije pronadjen",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "Korisnicko ime je vec zauzeto",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PutMapping("/{userId}/username")
+    public ResponseEntity<User> updateUsername(
+            @Parameter(description = "ID korisnika") @PathVariable String userId,
+            @Valid @RequestBody UpdateUsernameRequest request) {
+        User updated = movieRaterService.updateUsername(userId, request.getNewUsername()).join();
+        return ResponseEntity.ok(updated);
+    }
+
+    @Operation(summary = "Update password", description = "Change password for an existing user")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lozinka uspesno promenjena"),
+            @ApiResponse(responseCode = "401", description = "Trenutna lozinka nije ispravna",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Korisnik nije pronadjen",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PutMapping("/{userId}/password")
+    public ResponseEntity<String> updatePassword(
+            @Parameter(description = "ID korisnika") @PathVariable String userId,
+            @Valid @RequestBody UpdatePasswordRequest request) {
+        movieRaterService.updatePassword(userId, request).join();
+        return ResponseEntity.ok("Password updated successfully");
     }
 }

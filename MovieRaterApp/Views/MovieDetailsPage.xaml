@@ -6,6 +6,12 @@
              x:Class="MovieRaterApp.Views.MovieDetailsPage"
              Title="Detalji filma">
 
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Profil"
+                     Order="Primary"
+                     Command="{Binding GoToProfileCommand}" />
+    </ContentPage.ToolbarItems>
+
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="16">
 

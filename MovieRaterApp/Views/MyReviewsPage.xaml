@@ -6,6 +6,12 @@
              x:Class="MovieRaterApp.Views.MyReviewsPage"
              Title="Moje recenzije">
 
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Profil"
+                     Order="Primary"
+                     Command="{Binding GoToProfileCommand}" />
+    </ContentPage.ToolbarItems>
+
     <Grid RowDefinitions="Auto,Auto,*" Padding="16" RowSpacing="12">
 
         <ActivityIndicator Grid.Row="0"

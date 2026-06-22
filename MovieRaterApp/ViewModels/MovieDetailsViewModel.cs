@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MovieRaterApp.Models;
 using MovieRaterApp.Services;
+using MovieRaterApp.Views;
 
 namespace MovieRaterApp.ViewModels;
 
@@ -278,4 +279,10 @@ public partial class MovieDetailsViewModel : ObservableObject, IQueryAttributabl
         Description = details.Plot,
         Year = details.StartYear
     };
+
+    [RelayCommand]
+    private async Task GoToProfileAsync()
+    {
+        await Shell.Current.GoToAsync(nameof(ProfilePage));
+    }
 }

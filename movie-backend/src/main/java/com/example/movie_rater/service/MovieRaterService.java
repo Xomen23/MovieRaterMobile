@@ -4,6 +4,7 @@ import com.example.movie_rater.client.ImdbClient;
 import com.example.movie_rater.client.dto.ImdbSearchResponse;
 import com.example.movie_rater.client.dto.ImdbTitleResponse;
 import com.example.movie_rater.dto.AverageRatingResponse;
+import com.example.movie_rater.dto.UpdatePasswordRequest;
 import com.example.movie_rater.dto.UpdateReviewRequest;
 import com.example.movie_rater.exception.ApiException;
 import com.example.movie_rater.model.Movie;
@@ -79,6 +80,7 @@ public class MovieRaterService {
                 for (DataSnapshot child : snapshot.getChildren()) {
                     User user = child.getValue(User.class);
                     if (user != null && passwordEncoder.matches(password, user.getPassword())) {
+                        user.setId(child.getKey());
                         future.complete(user);
                         return;
                     }
@@ -258,9 +260,113 @@ public class MovieRaterService {
                 }
                 for (DataSnapshot child : snapshot.getChildren()) {
                     User user = child.getValue(User.class);
+                    if (user == null) {
+                        future.completeExceptionally(new ApiException("Korisnik nije pronadjen!", HttpStatus.NOT_FOUND));
+                        return;
+                    }
+                    user.setId(child.getKey());
                     future.complete(user);
                     return;
                 }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                future.completeExceptionally(new ApiException(error.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+        });
+        return future;
+    }
+
+    public CompletableFuture<User> updateUsername(String userId, String newUsername) {
+        CompletableFuture<User> future = new CompletableFuture<>();
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
+
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if (!snapshot.exists()) {
+                    future.completeExceptionally(new ApiException("User not found", HttpStatus.NOT_FOUND));
+                    return;
+                }
+                User user = snapshot.getValue(User.class);
+                if (user == null) {
+                    future.completeExceptionally(new ApiException("User not found", HttpStatus.NOT_FOUND));
+                    return;
+                }
+                user.setId(userId);
+
+                if (newUsername.equals(user.getUsername())) {
+                    future.complete(user);
+                    return;
+                }
+
+                DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+                usersRef.orderByChild("username").equalTo(newUsername).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot usernameSnapshot) {
+                        if (usernameSnapshot.exists()) {
+                            for (DataSnapshot child : usernameSnapshot.getChildren()) {
+                                if (!userId.equals(child.getKey())) {
+                                    future.completeExceptionally(new ApiException("Username already taken", HttpStatus.CONFLICT));
+                                    return;
+                                }
+                            }
+                        }
+                        user.setUsername(newUsername);
+                        user.setId(userId);
+                        userRef.setValue(user, (error, reference) -> {
+                            if (error != null) {
+                                future.completeExceptionally(new ApiException(error.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR));
+                            } else {
+                                future.complete(user);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                        future.completeExceptionally(new ApiException(error.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR));
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                future.completeExceptionally(new ApiException(error.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+        });
+        return future;
+    }
+
+    public CompletableFuture<Void> updatePassword(String userId, UpdatePasswordRequest request) {
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
+
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if (!snapshot.exists()) {
+                    future.completeExceptionally(new ApiException("User not found", HttpStatus.NOT_FOUND));
+                    return;
+                }
+                User user = snapshot.getValue(User.class);
+                if (user == null) {
+                    future.completeExceptionally(new ApiException("User not found", HttpStatus.NOT_FOUND));
+                    return;
+                }
+                if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+                    future.completeExceptionally(new ApiException("Current password is incorrect", HttpStatus.UNAUTHORIZED));
+                    return;
+                }
+                user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+                userRef.setValue(user, (error, reference) -> {
+                    if (error != null) {
+                        future.completeExceptionally(new ApiException(error.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR));
+                    } else {
+                        future.complete(null);
+                    }
+                });
             }
 
             @Override

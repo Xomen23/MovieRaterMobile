@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:controls="clr-namespace:MovieRaterApp.Controls"
+             x:Class="MovieRaterApp.Views.ProfilePage"
+             Title="Profil">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="20">
+
+            <Label Text="{Binding CurrentUsername, StringFormat='Ulogovan kao: {0}'}"
+                   FontSize="18"
+                   FontAttributes="Bold" />
+
+            <BoxView HeightRequest="1"
+                     Color="{AppThemeBinding Light=#DDDDDD, Dark=#444444}" />
+
+            <Label Text="Promeni korisničko ime"
+                   FontSize="16"
+                   FontAttributes="Bold" />
+
+            <Entry Placeholder="Novo korisničko ime"
+                   Text="{Binding NewUsername}" />
+
+            <Label Text="{Binding UsernameErrorMessage}"
+                   TextColor="Red"
+                   IsVisible="{Binding UsernameErrorMessage, Converter={toolkit:IsStringNotNullOrEmptyConverter}}" />
+
+            <Label Text="{Binding UsernameSuccessMessage}"
+                   TextColor="Green"
+                   IsVisible="{Binding UsernameSuccessMessage, Converter={toolkit:IsStringNotNullOrEmptyConverter}}" />
+
+            <ActivityIndicator IsRunning="{Binding IsUpdatingUsername}"
+                               IsVisible="{Binding IsUpdatingUsername}"
+                               HorizontalOptions="Center" />
+
+            <Button Text="Sačuvaj"
+                    Command="{Binding ChangeUsernameCommand}" />
+
+            <BoxView HeightRequest="1"
+                     Color="{AppThemeBinding Light=#DDDDDD, Dark=#444444}" />
+
+            <Label Text="Promeni lozinku"
+                   FontSize="16"
+                   FontAttributes="Bold" />
+
+            <controls:PasswordEntry Text="{Binding CurrentPassword}"
+                                      Placeholder="Trenutna lozinka" />
+
+            <controls:PasswordEntry Text="{Binding NewPassword}"
+                                      Placeholder="Nova lozinka" />
+
+            <controls:PasswordEntry Text="{Binding ConfirmNewPassword}"
+                                      Placeholder="Potvrdi novu lozinku" />
+
+            <Label Text="{Binding PasswordErrorMessage}"
+                   TextColor="Red"
+                   IsVisible="{Binding PasswordErrorMessage, Converter={toolkit:IsStringNotNullOrEmptyConverter}}" />
+
+            <Label Text="{Binding PasswordSuccessMessage}"
+                   TextColor="Green"
+                   IsVisible="{Binding PasswordSuccessMessage, Converter={toolkit:IsStringNotNullOrEmptyConverter}}" />
+
+            <ActivityIndicator IsRunning="{Binding IsUpdatingPassword}"
+                               IsVisible="{Binding IsUpdatingPassword}"
+                               HorizontalOptions="Center" />
+
+            <Button Text="Sačuvaj"
+                    Command="{Binding ChangePasswordCommand}" />
+
+            <BoxView HeightRequest="1"
+                     Color="{AppThemeBinding Light=#DDDDDD, Dark=#444444}" />
+
+            <Button Text="Odjavi se"
+                    Command="{Binding LogoutCommand}"
+                    BackgroundColor="Transparent"
+                    TextColor="Red"
+                    BorderWidth="0" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

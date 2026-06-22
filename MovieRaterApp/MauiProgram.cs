@@ -32,13 +32,15 @@ public static class MauiProgram
 		builder.Services.AddTransient<RegisterViewModel>();
 		builder.Services.AddTransient<SearchViewModel>();
 		builder.Services.AddTransient<MovieDetailsViewModel>();
-		builder.Services.AddTransient<MyReviewsViewModel>();
-		builder.Services.AddTransient<LoginPage>();
+        builder.Services.AddTransient<MyReviewsViewModel>();
+        builder.Services.AddTransient<ProfileViewModel>();
+        builder.Services.AddTransient<LoginPage>();
 		builder.Services.AddTransient<RegisterPage>();
 		builder.Services.AddTransient<SearchPage>();
 		builder.Services.AddTransient<MovieDetailsPage>();
-		builder.Services.AddTransient<MyReviewsPage>();
-		builder.Services.AddSingleton<AppShell>();
+        builder.Services.AddTransient<MyReviewsPage>();
+        builder.Services.AddTransient<ProfilePage>();
+        builder.Services.AddSingleton<AppShell>();
 
 #if DEBUG
 		builder.Logging.AddDebug();

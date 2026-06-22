@@ -74,6 +74,81 @@ public class ApiService
         }
     }
 
+    public async Task<(User? User, string? ErrorMessage)> UpdateUsernameAsync(string userId, string newUsername)
+    {
+        try
+        {
+            var response = await SendWithFallbackAsync(() =>
+                _httpClient.PutAsJsonAsync(
+                    $"api/users/{Uri.EscapeDataString(userId)}/username",
+                    new UpdateUsernameRequest { NewUsername = newUsername },
+                    JsonOptions));
+
+            if (response.IsSuccessStatusCode)
+                return (await response.Content.ReadFromJsonAsync<User>(JsonOptions), null);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+                return (null, "Korisničko ime je već zauzeto.");
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                return (null, "Korisnik nije pronađen.");
+
+            return (null, "Promena korisničkog imena nije uspela.");
+        }
+        catch (TaskCanceledException)
+        {
+            return (null, "Zahtev je istekao. Proveri konekciju sa serverom.");
+        }
+        catch (HttpRequestException)
+        {
+            return (null, "Nema konekcije sa serverom.");
+        }
+        catch
+        {
+            return (null, "Promena korisničkog imena nije uspela.");
+        }
+    }
+
+    public async Task<(bool Success, string? ErrorMessage)> UpdatePasswordAsync(
+        string userId, string currentPassword, string newPassword)
+    {
+        try
+        {
+            var response = await SendWithFallbackAsync(() =>
+                _httpClient.PutAsJsonAsync(
+                    $"api/users/{Uri.EscapeDataString(userId)}/password",
+                    new UpdatePasswordRequest
+                    {
+                        CurrentPassword = currentPassword,
+                        NewPassword = newPassword
+                    },
+                    JsonOptions));
+
+            if (response.IsSuccessStatusCode)
+                return (true, null);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                return (false, "Trenutna lozinka nije ispravna.");
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                return (false, "Korisnik nije pronađen.");
+
+            return (false, "Promena lozinke nije uspela.");
+        }
+        catch (TaskCanceledException)
+        {
+            return (false, "Zahtev je istekao. Proveri konekciju sa serverom.");
+        }
+        catch (HttpRequestException)
+        {
+            return (false, "Nema konekcije sa serverom.");
+        }
+        catch
+        {
+            return (false, "Promena lozinke nije uspela.");
+        }
+    }
+
     public async Task<User?> GetUserAsync(string username)
     {
         try

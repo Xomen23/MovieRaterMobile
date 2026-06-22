@@ -85,6 +85,12 @@ public partial class SearchViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task GoToProfileAsync()
+    {
+        await Shell.Current.GoToAsync(nameof(ProfilePage));
+    }
+
+    [RelayCommand]
     private async Task LogoutAsync()
     {
         _sessionService.ClearSession();

@@ -11,9 +11,13 @@
                      Order="Primary"
                      Priority="0"
                      Command="{Binding GoToMyReviewsCommand}" />
-        <ToolbarItem Text="Odjavi se"
+        <ToolbarItem Text="Profil"
                      Order="Primary"
                      Priority="1"
+                     Command="{Binding GoToProfileCommand}" />
+        <ToolbarItem Text="Odjavi se"
+                     Order="Primary"
+                     Priority="2"
                      Command="{Binding LogoutCommand}" />
     </ContentPage.ToolbarItems>
 

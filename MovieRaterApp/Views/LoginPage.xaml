@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:controls="clr-namespace:MovieRaterApp.Controls"
              x:Class="MovieRaterApp.Views.LoginPage"
              Title="Prijava">
 
@@ -17,10 +18,8 @@
                    Text="{Binding Username}"
                    ReturnType="Next" />
 
-            <Entry Placeholder="Lozinka"
-                   Text="{Binding Password}"
-                   IsPassword="True"
-                   ReturnType="Done" />
+            <controls:PasswordEntry Placeholder="Lozinka"
+                                    Text="{Binding Password}" />
 
             <Label Text="{Binding ErrorMessage}"
                    TextColor="Red"

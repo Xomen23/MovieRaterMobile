@@ -108,4 +108,10 @@ public partial class MyReviewsViewModel : ObservableObject
             IsLoading = false;
         }
     }
+
+    [RelayCommand]
+    private async Task GoToProfileAsync()
+    {
+        await Shell.Current.GoToAsync(nameof(ProfilePage));
+    }
 }
