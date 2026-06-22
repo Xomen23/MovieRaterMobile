@@ -45,8 +45,32 @@ build_metadata.AdditionalFiles.ManifestResourceName = MovieRaterApp.Resources.St
 build_metadata.AdditionalFiles.TargetPath = Resources\Styles\Styles.xaml
 build_metadata.AdditionalFiles.RelativePath = Resources\Styles\Styles.xaml
 
-[C:/Tule/MovieRaterMobile/MovieRaterApp/Views/HomePage.xaml]
+[C:/Tule/MovieRaterMobile/MovieRaterApp/Views/LoginPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
-build_metadata.AdditionalFiles.ManifestResourceName = MovieRaterApp.Views.HomePage.xaml
-build_metadata.AdditionalFiles.TargetPath = Views\HomePage.xaml
-build_metadata.AdditionalFiles.RelativePath = Views\HomePage.xaml
+build_metadata.AdditionalFiles.ManifestResourceName = MovieRaterApp.Views.LoginPage.xaml
+build_metadata.AdditionalFiles.TargetPath = Views\LoginPage.xaml
+build_metadata.AdditionalFiles.RelativePath = Views\LoginPage.xaml
+
+[C:/Tule/MovieRaterMobile/MovieRaterApp/Views/MovieDetailsPage.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = MovieRaterApp.Views.MovieDetailsPage.xaml
+build_metadata.AdditionalFiles.TargetPath = Views\MovieDetailsPage.xaml
+build_metadata.AdditionalFiles.RelativePath = Views\MovieDetailsPage.xaml
+
+[C:/Tule/MovieRaterMobile/MovieRaterApp/Views/MyReviewsPage.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = MovieRaterApp.Views.MyReviewsPage.xaml
+build_metadata.AdditionalFiles.TargetPath = Views\MyReviewsPage.xaml
+build_metadata.AdditionalFiles.RelativePath = Views\MyReviewsPage.xaml
+
+[C:/Tule/MovieRaterMobile/MovieRaterApp/Views/RegisterPage.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = MovieRaterApp.Views.RegisterPage.xaml
+build_metadata.AdditionalFiles.TargetPath = Views\RegisterPage.xaml
+build_metadata.AdditionalFiles.RelativePath = Views\RegisterPage.xaml
+
+[C:/Tule/MovieRaterMobile/MovieRaterApp/Views/SearchPage.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = MovieRaterApp.Views.SearchPage.xaml
+build_metadata.AdditionalFiles.TargetPath = Views\SearchPage.xaml
+build_metadata.AdditionalFiles.RelativePath = Views\SearchPage.xaml

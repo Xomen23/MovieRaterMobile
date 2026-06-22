@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MovieRaterApp.Views.RegisterPage"
+             Title="Register">
+
+    <VerticalStackLayout Padding="24" Spacing="16" VerticalOptions="Center">
+        <Label Text="RegisterPage"
+               FontSize="28"
+               HorizontalOptions="Center" />
+        <Label Text="Placeholder — registracija korisnika"
+               HorizontalOptions="Center" />
+        <Button Text="Nazad na Login"
+                Clicked="OnGoBackClicked" />
+    </VerticalStackLayout>
+
+</ContentPage>

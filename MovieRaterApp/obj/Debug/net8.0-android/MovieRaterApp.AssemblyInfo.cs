@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MovieRaterApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+17eb033b0a4077af97dccb6d1ddf279512e966ad")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+928dba073bf348e4f8cc562f2b3da1bfa299018c")]
 [assembly: System.Reflection.AssemblyProductAttribute("MovieRaterApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MovieRaterApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
