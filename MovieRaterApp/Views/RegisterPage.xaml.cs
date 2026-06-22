@@ -1,14 +1,21 @@
+using MovieRaterApp.ViewModels;
+
 namespace MovieRaterApp.Views;
 
 public partial class RegisterPage : ContentPage
 {
-    public RegisterPage()
+    private readonly RegisterViewModel _viewModel;
+
+    public RegisterPage(RegisterViewModel viewModel)
     {
         InitializeComponent();
+        _viewModel = viewModel;
+        BindingContext = viewModel;
     }
 
-    private async void OnGoBackClicked(object? sender, EventArgs e)
+    protected override async void OnAppearing()
     {
-        await Shell.Current.GoToAsync("..");
+        base.OnAppearing();
+        await _viewModel.RefreshConnectionAsync();
     }
 }

@@ -1,17 +1,64 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="MovieRaterApp.Views.RegisterPage"
-             Title="Register">
+             Title="Registracija">
 
-    <VerticalStackLayout Padding="24" Spacing="16" VerticalOptions="Center">
-        <Label Text="RegisterPage"
-               FontSize="28"
-               HorizontalOptions="Center" />
-        <Label Text="Placeholder — registracija korisnika"
-               HorizontalOptions="Center" />
-        <Button Text="Nazad na Login"
-                Clicked="OnGoBackClicked" />
-    </VerticalStackLayout>
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="16" VerticalOptions="Center">
+
+            <Label Text="Registracija"
+                   FontSize="28"
+                   HorizontalOptions="Center"
+                   SemanticProperties.HeadingLevel="Level1" />
+
+            <Entry Placeholder="Ime"
+                   Text="{Binding FirstName}"
+                   ReturnType="Next" />
+
+            <Entry Placeholder="Prezime"
+                   Text="{Binding LastName}"
+                   ReturnType="Next" />
+
+            <Entry Placeholder="Korisničko ime"
+                   Text="{Binding Username}"
+                   ReturnType="Next" />
+
+            <Entry Placeholder="Lozinka"
+                   Text="{Binding Password}"
+                   IsPassword="True"
+                   ReturnType="Next" />
+
+            <Entry Placeholder="Potvrdi lozinku"
+                   Text="{Binding ConfirmPassword}"
+                   IsPassword="True"
+                   ReturnType="Done" />
+
+            <Label Text="{Binding ErrorMessage}"
+                   TextColor="Red"
+                   IsVisible="{Binding ErrorMessage, Converter={toolkit:IsStringNotNullOrEmptyConverter}}" />
+
+            <Label Text="{Binding ServerUrl}"
+                   FontSize="11"
+                   TextColor="Gray"
+                   HorizontalOptions="Center" />
+
+            <ActivityIndicator IsRunning="{Binding IsLoading}"
+                               IsVisible="{Binding IsLoading}"
+                               HorizontalOptions="Center" />
+
+            <Button Text="Registruj se"
+                    Command="{Binding RegisterCommand}"
+                    IsEnabled="{Binding CanRegister}" />
+
+            <Button Text="Već imaš nalog? Prijavi se"
+                    Command="{Binding GoToLoginCommand}"
+                    BackgroundColor="Transparent"
+                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource White}}"
+                    BorderWidth="0" />
+
+        </VerticalStackLayout>
+    </ScrollView>
 
 </ContentPage>

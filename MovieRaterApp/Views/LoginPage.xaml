@@ -1,19 +1,46 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="MovieRaterApp.Views.LoginPage"
-             Title="Login">
+             Title="Prijava">
 
-    <VerticalStackLayout Padding="24" Spacing="16" VerticalOptions="Center">
-        <Label Text="LoginPage"
-               FontSize="28"
-               HorizontalOptions="Center" />
-        <Label Text="Placeholder — prijava korisnika"
-               HorizontalOptions="Center" />
-        <Button Text="Idi na Register"
-                Clicked="OnGoToRegisterClicked" />
-        <Button Text="Idi na Search (simulacija login-a)"
-                Clicked="OnGoToSearchClicked" />
-    </VerticalStackLayout>
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="16" VerticalOptions="Center">
+
+            <Label Text="Prijava"
+                   FontSize="28"
+                   HorizontalOptions="Center"
+                   SemanticProperties.HeadingLevel="Level1" />
+
+            <Entry Placeholder="Korisničko ime"
+                   Text="{Binding Username}"
+                   ReturnType="Next" />
+
+            <Entry Placeholder="Lozinka"
+                   Text="{Binding Password}"
+                   IsPassword="True"
+                   ReturnType="Done" />
+
+            <Label Text="{Binding ErrorMessage}"
+                   TextColor="Red"
+                   IsVisible="{Binding ErrorMessage, Converter={toolkit:IsStringNotNullOrEmptyConverter}}" />
+
+            <ActivityIndicator IsRunning="{Binding IsLoading}"
+                               IsVisible="{Binding IsLoading}"
+                               HorizontalOptions="Center" />
+
+            <Button Text="Prijavi se"
+                    Command="{Binding LoginCommand}"
+                    IsEnabled="{Binding CanLogin}" />
+
+            <Button Text="Nemaš nalog? Registruj se"
+                    Command="{Binding GoToRegisterCommand}"
+                    BackgroundColor="Transparent"
+                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource White}}"
+                    BorderWidth="0" />
+
+        </VerticalStackLayout>
+    </ScrollView>
 
 </ContentPage>

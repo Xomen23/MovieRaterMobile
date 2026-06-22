@@ -12,4 +12,11 @@
         ContentTemplate="{DataTemplate views:LoginPage}"
         Route="LoginPage" />
 
+    <ShellContent
+        Title="Search"
+        ContentTemplate="{DataTemplate views:SearchPage}"
+        Route="SearchPage"
+        Shell.TabBarIsVisible="False"
+        Shell.NavBarIsVisible="True" />
+
 </Shell>

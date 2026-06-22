@@ -1,19 +1,12 @@
+using MovieRaterApp.ViewModels;
+
 namespace MovieRaterApp.Views;
 
 public partial class LoginPage : ContentPage
 {
-    public LoginPage()
+    public LoginPage(LoginViewModel viewModel)
     {
         InitializeComponent();
-    }
-
-    private async void OnGoToRegisterClicked(object? sender, EventArgs e)
-    {
-        await Shell.Current.GoToAsync(nameof(RegisterPage));
-    }
-
-    private async void OnGoToSearchClicked(object? sender, EventArgs e)
-    {
-        await Shell.Current.GoToAsync(nameof(SearchPage));
+        BindingContext = viewModel;
     }
 }

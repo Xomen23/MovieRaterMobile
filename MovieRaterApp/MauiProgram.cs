@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using MovieRaterApp.Services;
+using MovieRaterApp.ViewModels;
 using MovieRaterApp.Views;
 
 namespace MovieRaterApp;
@@ -19,19 +20,16 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});
 
-		// Android emulator mapira 10.0.2.2 na localhost host mašine.
-		// Za fizički telefon koristi IP računara u lokalnoj mreži (npr. http://192.168.x.x:8080/).
-		builder.Services.AddSingleton(_ =>
+		builder.Services.AddSingleton<ApiConnectionResolver>();
+		builder.Services.AddSingleton(_ => new HttpClient
 		{
-			var httpClient = new HttpClient
-			{
-				BaseAddress = new Uri("http://10.0.2.2:8080/")
-			};
-			return httpClient;
+			Timeout = TimeSpan.FromSeconds(15)
 		});
 		builder.Services.AddSingleton<ApiService>();
 		builder.Services.AddSingleton<SessionService>();
 
+		builder.Services.AddTransient<LoginViewModel>();
+		builder.Services.AddTransient<RegisterViewModel>();
 		builder.Services.AddTransient<LoginPage>();
 		builder.Services.AddTransient<RegisterPage>();
 		builder.Services.AddTransient<SearchPage>();

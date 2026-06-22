@@ -7,30 +7,53 @@ namespace MovieRaterApp.Services;
 public class ApiService
 {
     private readonly HttpClient _httpClient;
+    private readonly ApiConnectionResolver _resolver;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true
     };
 
-    public ApiService(HttpClient httpClient)
+    public ApiService(HttpClient httpClient, ApiConnectionResolver resolver)
     {
         _httpClient = httpClient;
+        _resolver = resolver;
     }
 
-    public async Task<string?> RegisterAsync(RegisterRequest request)
+    public string BaseUrl =>
+        _resolver.ActiveBaseUrl
+        ?? _httpClient.BaseAddress?.ToString()
+        ?? string.Join(" → ", ApiConstants.GetCandidateBaseUrls());
+
+    public async Task EnsureConnectionAsync() => await EnsureBaseUrlAsync();
+
+    public async Task<(string? UserId, string? ErrorMessage)> RegisterAsync(RegisterRequest request)
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync("api/users/register", request, JsonOptions);
-            if (!response.IsSuccessStatusCode)
-                return null;
+            var response = await SendWithFallbackAsync(() =>
+                _httpClient.PostAsJsonAsync("api/users/register", request, JsonOptions));
+            var body = await response.Content.ReadAsStringAsync();
 
-            return await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+                return (body.Trim('"'), null);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                return (null, string.IsNullOrWhiteSpace(body) ? "Korisničko ime već postoji." : body);
+
+            return (null, $"Server je vratio grešku ({(int)response.StatusCode}).");
         }
-        catch
+        catch (TaskCanceledException)
         {
-            return null;
+            return (null, $"Zahtev je istekao ({BaseUrl}). Proveri backend i Wi-Fi/USB konekciju.");
+        }
+        catch (HttpRequestException)
+        {
+            return (null, $"Nema konekcije ({BaseUrl}). Wi-Fi: firewall port 8080. USB: adb reverse tcp:8080 tcp:8080.");
+        }
+        catch (Exception)
+        {
+            return (null, "Registracija nije uspela. Proveri konekciju sa serverom.");
         }
     }
 
@@ -38,7 +61,8 @@ public class ApiService
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync("api/users/login", request, JsonOptions);
+            var response = await SendWithFallbackAsync(() =>
+                _httpClient.PostAsJsonAsync("api/users/login", request, JsonOptions));
             if (!response.IsSuccessStatusCode)
                 return null;
 
@@ -54,7 +78,8 @@ public class ApiService
     {
         try
         {
-            var response = await _httpClient.GetAsync($"api/users/me?username={Uri.EscapeDataString(username)}");
+            var response = await SendWithFallbackAsync(() =>
+                _httpClient.GetAsync($"api/users/me?username={Uri.EscapeDataString(username)}"));
             if (!response.IsSuccessStatusCode)
                 return null;
 
@@ -70,7 +95,8 @@ public class ApiService
     {
         try
         {
-            var response = await _httpClient.GetAsync($"api/movies/search?query={Uri.EscapeDataString(query)}");
+            var response = await SendWithFallbackAsync(() =>
+                _httpClient.GetAsync($"api/movies/search?query={Uri.EscapeDataString(query)}"));
             if (!response.IsSuccessStatusCode)
                 return null;
 
@@ -86,7 +112,8 @@ public class ApiService
     {
         try
         {
-            var response = await _httpClient.GetAsync($"api/movies/imdb/{Uri.EscapeDataString(imdbId)}");
+            var response = await SendWithFallbackAsync(() =>
+                _httpClient.GetAsync($"api/movies/imdb/{Uri.EscapeDataString(imdbId)}"));
             if (!response.IsSuccessStatusCode)
                 return null;
 
@@ -102,7 +129,8 @@ public class ApiService
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync("api/movies/review", request, JsonOptions);
+            var response = await SendWithFallbackAsync(() =>
+                _httpClient.PostAsJsonAsync("api/movies/review", request, JsonOptions));
             if (!response.IsSuccessStatusCode)
                 return null;
 
@@ -118,7 +146,8 @@ public class ApiService
     {
         try
         {
-            var response = await _httpClient.PutAsJsonAsync($"api/movies/review/{Uri.EscapeDataString(reviewId)}", request, JsonOptions);
+            var response = await SendWithFallbackAsync(() =>
+                _httpClient.PutAsJsonAsync($"api/movies/review/{Uri.EscapeDataString(reviewId)}", request, JsonOptions));
             if (!response.IsSuccessStatusCode)
                 return null;
 
@@ -134,7 +163,8 @@ public class ApiService
     {
         try
         {
-            var response = await _httpClient.DeleteAsync($"api/movies/review/{Uri.EscapeDataString(reviewId)}");
+            var response = await SendWithFallbackAsync(() =>
+                _httpClient.DeleteAsync($"api/movies/review/{Uri.EscapeDataString(reviewId)}"));
             return response.IsSuccessStatusCode;
         }
         catch
@@ -147,7 +177,8 @@ public class ApiService
     {
         try
         {
-            var response = await _httpClient.GetAsync($"api/movies/{Uri.EscapeDataString(imdbId)}/reviews");
+            var response = await SendWithFallbackAsync(() =>
+                _httpClient.GetAsync($"api/movies/{Uri.EscapeDataString(imdbId)}/reviews"));
             if (!response.IsSuccessStatusCode)
                 return null;
 
@@ -163,7 +194,8 @@ public class ApiService
     {
         try
         {
-            var response = await _httpClient.GetAsync($"api/movies?userId={Uri.EscapeDataString(userId)}");
+            var response = await SendWithFallbackAsync(() =>
+                _httpClient.GetAsync($"api/movies?userId={Uri.EscapeDataString(userId)}"));
             if (!response.IsSuccessStatusCode)
                 return null;
 
@@ -179,7 +211,8 @@ public class ApiService
     {
         try
         {
-            var response = await _httpClient.GetAsync($"api/movies/{Uri.EscapeDataString(imdbId)}/average-rating");
+            var response = await SendWithFallbackAsync(() =>
+                _httpClient.GetAsync($"api/movies/{Uri.EscapeDataString(imdbId)}/average-rating"));
             if (!response.IsSuccessStatusCode)
                 return null;
 
@@ -190,4 +223,35 @@ public class ApiService
             return null;
         }
     }
+
+    private async Task EnsureBaseUrlAsync()
+    {
+        var url = await _resolver.ResolveAsync();
+        if (_httpClient.BaseAddress?.ToString() != url)
+            _httpClient.BaseAddress = new Uri(url);
+    }
+
+    private async Task<HttpResponseMessage> SendWithFallbackAsync(Func<Task<HttpResponseMessage>> send)
+    {
+        Exception? lastError = null;
+
+        for (var attempt = 0; attempt < 2; attempt++)
+        {
+            await EnsureBaseUrlAsync();
+            try
+            {
+                return await send();
+            }
+            catch (Exception ex) when (IsConnectionError(ex))
+            {
+                lastError = ex;
+                _resolver.Invalidate();
+            }
+        }
+
+        throw lastError ?? new HttpRequestException("Nema konekcije sa serverom.");
+    }
+
+    private static bool IsConnectionError(Exception ex) =>
+        ex is HttpRequestException or TaskCanceledException;
 }
