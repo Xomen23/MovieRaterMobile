@@ -1,18 +1,68 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:models="clr-namespace:MovieRaterApp.Models"
              x:Class="MovieRaterApp.Views.MyReviewsPage"
-             Title="My Reviews">
+             Title="Moje recenzije">
 
-    <VerticalStackLayout Padding="24" Spacing="16" VerticalOptions="Center">
-        <Label Text="MyReviewsPage"
-               FontSize="28"
-               HorizontalOptions="Center" />
-        <Label Text="Placeholder — korisnička kolekcija recenzija"
-               HorizontalTextAlignment="Center"
-               HorizontalOptions="Center" />
-        <Button Text="Nazad"
-                Clicked="OnGoBackClicked" />
-    </VerticalStackLayout>
+    <Grid RowDefinitions="Auto,Auto,*" Padding="16" RowSpacing="12">
+
+        <ActivityIndicator Grid.Row="0"
+                           IsRunning="{Binding IsLoading}"
+                           IsVisible="{Binding IsLoading}"
+                           HorizontalOptions="Center" />
+
+        <Label Grid.Row="1"
+               Text="{Binding ErrorMessage}"
+               TextColor="Red"
+               IsVisible="{Binding ErrorMessage, Converter={toolkit:IsStringNotNullOrEmptyConverter}}" />
+
+        <CollectionView Grid.Row="2"
+                        ItemsSource="{Binding MyReviews}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Review">
+                    <Border Padding="12"
+                            Margin="0,0,0,8"
+                            Stroke="{AppThemeBinding Light=#DDDDDD, Dark=#444444}"
+                            StrokeThickness="1">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.GoToMovieDetailsCommand}"
+                                                CommandParameter="{Binding .}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto">
+                            <Label Grid.Row="0"
+                                   Grid.Column="0"
+                                   Text="{Binding ImdbId, StringFormat='Film: {0}'}"
+                                   FontAttributes="Bold" />
+                            <Button Grid.Row="0"
+                                    Grid.Column="1"
+                                    Text="Obriši"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteReviewCommand}"
+                                    CommandParameter="{Binding .}"
+                                    BackgroundColor="Transparent"
+                                    TextColor="Red"
+                                    Padding="8,0"
+                                    BorderWidth="0" />
+                            <Label Grid.Row="1"
+                                   Grid.ColumnSpan="2"
+                                   Text="{Binding Rating, StringFormat='★ {0}/10'}"
+                                   TextColor="{StaticResource Primary}" />
+                            <Label Grid.Row="2"
+                                   Grid.ColumnSpan="2"
+                                   Text="{Binding ReviewText}"
+                                   LineBreakMode="WordWrap" />
+                            <Label Grid.Row="3"
+                                   Grid.ColumnSpan="2"
+                                   Text="{Binding CreatedAt}"
+                                   FontSize="12"
+                                   TextColor="Gray" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </Grid>
 
 </ContentPage>

@@ -19,6 +19,7 @@
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<WindowsSdkPackageVersion>10.0.19041.56</WindowsSdkPackageVersion>
 
 		<!-- Display name -->
 		<ApplicationTitle>MovieRaterApp</ApplicationTitle>

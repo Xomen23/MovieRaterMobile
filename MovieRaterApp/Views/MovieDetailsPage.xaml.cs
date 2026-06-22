@@ -1,14 +1,20 @@
+using MovieRaterApp.ViewModels;
+
 namespace MovieRaterApp.Views;
 
-public partial class MovieDetailsPage : ContentPage
+public partial class MovieDetailsPage : ContentPage, IQueryAttributable
 {
-    public MovieDetailsPage()
+    private readonly MovieDetailsViewModel _viewModel;
+
+    public MovieDetailsPage(MovieDetailsViewModel viewModel)
     {
         InitializeComponent();
+        _viewModel = viewModel;
+        BindingContext = viewModel;
     }
 
-    private async void OnGoBackClicked(object? sender, EventArgs e)
+    public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
-        await Shell.Current.GoToAsync("..");
+        _viewModel.ApplyQueryAttributes(query);
     }
 }

@@ -1,14 +1,21 @@
+using MovieRaterApp.ViewModels;
+
 namespace MovieRaterApp.Views;
 
 public partial class MyReviewsPage : ContentPage
 {
-    public MyReviewsPage()
+    private readonly MyReviewsViewModel _viewModel;
+
+    public MyReviewsPage(MyReviewsViewModel viewModel)
     {
         InitializeComponent();
+        _viewModel = viewModel;
+        BindingContext = viewModel;
     }
 
-    private async void OnGoBackClicked(object? sender, EventArgs e)
+    protected override void OnAppearing()
     {
-        await Shell.Current.GoToAsync("..");
+        base.OnAppearing();
+        _viewModel.LoadMyReviewsCommand.Execute(null);
     }
 }
