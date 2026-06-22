@@ -41,4 +41,7 @@ public class Review {
 
     @Schema(description = "Datum kreiranja recenzije")
     private String createdAt;
+
+    @Schema(description = "Datum poslednje izmene recenzije")
+    private String updatedAt;
 }

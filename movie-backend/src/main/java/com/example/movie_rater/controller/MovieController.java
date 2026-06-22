@@ -2,8 +2,10 @@ package com.example.movie_rater.controller;
 
 import com.example.movie_rater.client.dto.ImdbSearchResponse;
 import com.example.movie_rater.client.dto.ImdbTitleResponse;
+import com.example.movie_rater.dto.AverageRatingResponse;
 import com.example.movie_rater.dto.ErrorResponse;
 import com.example.movie_rater.dto.ReviewRequest;
+import com.example.movie_rater.dto.UpdateReviewRequest;
 import com.example.movie_rater.model.Review;
 import com.example.movie_rater.service.MovieRaterService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -84,6 +86,18 @@ public class MovieController {
         return ResponseEntity.ok(reviews);
     }
 
+    @Operation(summary = "Get average rating for a movie", description = "Calculate average rating from all reviews for the given imdbId")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Prosecna ocena i broj recenzija"),
+            @ApiResponse(responseCode = "500", description = "Greska pri dohvatanju",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/{imdbId}/average-rating")
+    public ResponseEntity<AverageRatingResponse> getAverageRating(
+            @Parameter(description = "ID from imdb") @PathVariable(value = "imdbId") String imdbId) {
+        return ResponseEntity.ok(movieRaterService.getAverageRating(imdbId));
+    }
+
     @Operation(summary = "Get all reviews for a user", description = "Put userId to see all movies/reviews added by that user (collection)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista recenzija korisnika"),
@@ -108,5 +122,25 @@ public class MovieController {
             @Parameter(description = "ID of the review") @PathVariable(value = "reviewId") String reviewId) {
         movieRaterService.deleteReview(reviewId).join();
         return ResponseEntity.ok("Recenzija je uspesno obrisana!");
+    }
+
+    @Operation(summary = "Update review", description = "Update rating and comment for an existing review (owner only)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Recenzija uspesno azurirana"),
+            @ApiResponse(responseCode = "400", description = "Nevalidan zahtev",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Nije vlasnik recenzije",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Recenzija nije pronadjena",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Greska pri azuriranju",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PutMapping("/review/{reviewId}")
+    public ResponseEntity<Review> updateReview(
+            @Parameter(description = "ID of the review") @PathVariable(value = "reviewId") String reviewId,
+            @Valid @RequestBody UpdateReviewRequest request) {
+        Review updated = movieRaterService.updateReview(reviewId, request).join();
+        return ResponseEntity.ok(updated);
     }
 }
