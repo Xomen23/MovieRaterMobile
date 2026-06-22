@@ -1,22 +1,76 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:models="clr-namespace:MovieRaterApp.Models"
              x:Class="MovieRaterApp.Views.SearchPage"
-             Title="Search">
+             Title="Pretraga filmova">
 
-    <VerticalStackLayout Padding="24" Spacing="16" VerticalOptions="Center">
-        <Label Text="SearchPage"
-               FontSize="28"
-               HorizontalOptions="Center" />
-        <Label Text="Placeholder — glavni ekran (pretraga filmova)"
-               HorizontalTextAlignment="Center"
-               HorizontalOptions="Center" />
-        <Button Text="Idi na Movie Details"
-                Clicked="OnGoToMovieDetailsClicked" />
-        <Button Text="Idi na My Reviews (kolekcija)"
-                Clicked="OnGoToMyReviewsClicked" />
-        <Button Text="Nazad na Login"
-                Clicked="OnGoBackClicked" />
-    </VerticalStackLayout>
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Moje recenzije"
+                     Order="Primary"
+                     Priority="0"
+                     Command="{Binding GoToMyReviewsCommand}" />
+        <ToolbarItem Text="Odjavi se"
+                     Order="Primary"
+                     Priority="1"
+                     Command="{Binding LogoutCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*" Padding="16" RowSpacing="12">
+
+        <SearchBar Grid.Row="0"
+                   Placeholder="Pretraži filmove..."
+                   Text="{Binding SearchQuery}"
+                   SearchCommand="{Binding SearchCommand}" />
+
+        <ActivityIndicator Grid.Row="1"
+                           IsRunning="{Binding IsLoading}"
+                           IsVisible="{Binding IsLoading}"
+                           HorizontalOptions="Center" />
+
+        <Label Grid.Row="2"
+               Text="{Binding ErrorMessage}"
+               TextColor="Red"
+               IsVisible="{Binding ErrorMessage, Converter={toolkit:IsStringNotNullOrEmptyConverter}}" />
+
+        <Label Grid.Row="2"
+               Text="Nema rezultata za ovu pretragu."
+               HorizontalOptions="Center"
+               TextColor="Gray"
+               IsVisible="{Binding ShowNoResults}" />
+
+        <CollectionView Grid.Row="3"
+                        ItemsSource="{Binding SearchResults}"
+                        SelectionMode="Single"
+                        SelectionChangedCommand="{Binding GoToMovieDetailsCommand}"
+                        SelectionChangedCommandParameter="{Binding Source={RelativeSource Self}, Path=SelectedItem}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:ImdbTitle">
+                    <Grid Padding="8"
+                          ColumnDefinitions="80,*"
+                          ColumnSpacing="12">
+                        <Image Source="{Binding PrimaryImage.Url}"
+                               WidthRequest="80"
+                               HeightRequest="120"
+                               Aspect="AspectFill"
+                               BackgroundColor="{AppThemeBinding Light=#EEEEEE, Dark=#333333}" />
+                        <VerticalStackLayout Grid.Column="1"
+                                             VerticalOptions="Center"
+                                             Spacing="4">
+                            <Label Text="{Binding OriginalTitle}"
+                                   FontAttributes="Bold"
+                                   FontSize="16"
+                                   LineBreakMode="TailTruncation" />
+                            <Label Text="{Binding StartYear, StringFormat='{0}'}"
+                                   FontSize="14"
+                                   TextColor="Gray" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </Grid>
 
 </ContentPage>

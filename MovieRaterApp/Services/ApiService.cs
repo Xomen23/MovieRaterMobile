@@ -100,7 +100,11 @@ public class ApiService
             if (!response.IsSuccessStatusCode)
                 return null;
 
-            return await response.Content.ReadFromJsonAsync<ImdbSearchResponse>(JsonOptions);
+            var json = await response.Content.ReadAsStringAsync();
+#if DEBUG
+            System.Diagnostics.Debug.WriteLine($"IMDB search raw JSON: {json}");
+#endif
+            return JsonSerializer.Deserialize<ImdbSearchResponse>(json, JsonOptions);
         }
         catch
         {
