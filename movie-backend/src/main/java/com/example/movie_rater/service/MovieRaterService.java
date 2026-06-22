@@ -3,10 +3,13 @@ package com.example.movie_rater.service;
 import com.example.movie_rater.client.ImdbClient;
 import com.example.movie_rater.client.dto.ImdbSearchResponse;
 import com.example.movie_rater.client.dto.ImdbTitleResponse;
+import com.example.movie_rater.exception.ApiException;
 import com.example.movie_rater.model.Movie;
 import com.example.movie_rater.model.Review;
 import com.example.movie_rater.model.User;
 import com.google.firebase.database.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -17,69 +20,43 @@ import java.util.concurrent.CompletableFuture;
 public class MovieRaterService {
 
     private final ImdbClient imdbClient;
+    private final PasswordEncoder passwordEncoder;
 
-    public MovieRaterService(ImdbClient imdbClient) {
+    public MovieRaterService(ImdbClient imdbClient, PasswordEncoder passwordEncoder) {
         this.imdbClient = imdbClient;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    /*
-    public CompletableFuture<String> registerUser(User user) {
-        CompletableFuture<String> future = new CompletableFuture<>();
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users");
-
-        ref.orderByChild("username").equalTo(user.getUsername()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    future.completeExceptionally(new RuntimeException("Username vec postoji!"));
-                } else {
-                    String userId = ref.push().getKey();
-                    user.setId(userId);
-                    ref.child(userId).setValue(user, (error, reference) -> {
-                        if (error != null) future.completeExceptionally(error.toException());
-                        else future.complete(userId);
-                    });
-                }
-            }
-            @Override
-            public void onCancelled(DatabaseError error) {
-                future.completeExceptionally(error.toException());
-            }
-        });
-        return future;
-    }*/
     public CompletableFuture<String> registerUser(User user) {
         CompletableFuture<String> future = new CompletableFuture<>();
         try {
             DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users");
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
 
             ref.orderByChild("username").equalTo(user.getUsername()).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot snapshot) {
                     if (snapshot.exists()) {
-                        future.completeExceptionally(new RuntimeException("Username vec postoji!"));
+                        future.completeExceptionally(new ApiException("Username vec postoji!", HttpStatus.BAD_REQUEST));
                     } else {
                         String userId = ref.push().getKey();
                         user.setId(userId);
                         ref.child(userId).setValue(user, (error, reference) -> {
                             if (error != null) {
-                                System.err.println("Firebase error prilikom upisa: " + error.getMessage());
-                                future.completeExceptionally(error.toException());
+                                future.completeExceptionally(new ApiException(error.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR));
                             } else {
                                 future.complete(userId);
                             }
                         });
                     }
                 }
+
                 @Override
                 public void onCancelled(DatabaseError error) {
-                    System.err.println("Firebase DatabaseError: " + error.getMessage());
-                    future.completeExceptionally(error.toException());
+                    future.completeExceptionally(new ApiException(error.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR));
                 }
             });
         } catch (Exception e) {
-            System.err.println("Generalna greska u servisu: " + e.getMessage());
-            e.printStackTrace();
             future.completeExceptionally(e);
         }
         return future;
@@ -93,22 +70,22 @@ public class MovieRaterService {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 if (!snapshot.exists()) {
-                    future.completeExceptionally(new RuntimeException("Korisnik nije pronadjen!"));
+                    future.completeExceptionally(new ApiException("Korisnik nije pronadjen!", HttpStatus.UNAUTHORIZED));
                     return;
                 }
                 for (DataSnapshot child : snapshot.getChildren()) {
                     User user = child.getValue(User.class);
-                    if (user != null && user.getPassword().equals(password)) {
+                    if (user != null && passwordEncoder.matches(password, user.getPassword())) {
                         future.complete(user);
                         return;
                     }
                 }
-                future.completeExceptionally(new RuntimeException("Pogresna sifra!"));
+                future.completeExceptionally(new ApiException("Pogresna sifra!", HttpStatus.UNAUTHORIZED));
             }
 
             @Override
             public void onCancelled(DatabaseError error) {
-                future.completeExceptionally(error.toException());
+                future.completeExceptionally(new ApiException(error.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR));
             }
         });
         return future;
@@ -129,14 +106,17 @@ public class MovieRaterService {
 
         movieRef.setValue(movie, (error1, ref1) -> {
             if (error1 != null) {
-                future.completeExceptionally(error1.toException());
+                future.completeExceptionally(new ApiException(error1.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR));
                 return;
             }
             String reviewId = reviewRef.push().getKey();
             review.setId(reviewId);
             reviewRef.child(reviewId).setValue(review, (error2, ref2) -> {
-                if (error2 != null) future.completeExceptionally(error2.toException());
-                else future.complete(null);
+                if (error2 != null) {
+                    future.completeExceptionally(new ApiException(error2.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR));
+                } else {
+                    future.complete(null);
+                }
             });
         });
         return future;
@@ -161,7 +141,7 @@ public class MovieRaterService {
 
             @Override
             public void onCancelled(DatabaseError error) {
-                future.completeExceptionally(error.toException());
+                future.completeExceptionally(new ApiException(error.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR));
             }
         });
         return future;
@@ -186,7 +166,7 @@ public class MovieRaterService {
 
             @Override
             public void onCancelled(DatabaseError error) {
-                future.completeExceptionally(error.toException());
+                future.completeExceptionally(new ApiException(error.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR));
             }
         });
         return future;
@@ -197,8 +177,11 @@ public class MovieRaterService {
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("reviews").child(reviewId);
 
         ref.removeValue((error, reference) -> {
-            if (error != null) future.completeExceptionally(error.toException());
-            else future.complete(null);
+            if (error != null) {
+                future.completeExceptionally(new ApiException(error.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR));
+            } else {
+                future.complete(null);
+            }
         });
         return future;
     }
@@ -211,7 +194,7 @@ public class MovieRaterService {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 if (!snapshot.exists()) {
-                    future.completeExceptionally(new RuntimeException("Korisnik nije pronadjen!"));
+                    future.completeExceptionally(new ApiException("Korisnik nije pronadjen!", HttpStatus.NOT_FOUND));
                     return;
                 }
                 for (DataSnapshot child : snapshot.getChildren()) {
@@ -223,7 +206,7 @@ public class MovieRaterService {
 
             @Override
             public void onCancelled(DatabaseError error) {
-                future.completeExceptionally(error.toException());
+                future.completeExceptionally(new ApiException(error.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR));
             }
         });
         return future;
